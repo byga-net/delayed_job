@@ -184,7 +184,11 @@ module Delayed
               break
             elsif !stop?
               sleep(self.class.sleep_delay)
-              reload!
+              # patch from https://github.com/collectiveidea/delayed_job/compare/master...financeit:v.4.0.6_leak_fix
+              if self.class.reload_app? &&
+                  Delayed::Job.ready_to_run(self, Worker.max_run_time).any?
+                reload!
+              end
             end
           else
             say format("#{count} jobs processed at %.4f j/s, %d failed", count / @realtime, @result.last)
