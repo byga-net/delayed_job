@@ -280,6 +280,7 @@ module Delayed
     end
 
     def say(text, level = default_log_level)
+      return
       text = "[Worker(#{name})] #{text}"
       puts text unless @quiet
       return unless logger
