@@ -146,9 +146,15 @@ describe Delayed::Worker do
       end
     end
 
-    severities = [{:index => 0, :level => 'debug'},
-                  {:index => 1, :level => 'info'},
-                  {:index => 2, :level => 'warn'},
+    [{:index => 0, :level => 'debug'}, {:index => 1, :level => 'info'}].each do |severity|
+      it "drops a message on the #{severity[:level].upcase} level" do
+        expect(@worker.logger).not_to receive(:send)
+        @worker.say(@text, severity[:level])
+        @worker.say(@text, severity[:index])
+      end
+    end
+
+    severities = [{:index => 2, :level => 'warn'},
                   {:index => 3, :level => 'error'},
                   {:index => 4, :level => 'fatal'},
                   {:index => 5, :level => 'unknown'}]
@@ -156,9 +162,8 @@ describe Delayed::Worker do
       it_behaves_like 'a worker which logs on the correct severity', severity
     end
 
-    it 'logs a message on the default log\'s level' do
-      expect(@worker.logger).to receive(:send).
-        with('info', "#{@expected_time}: #{@worker_name} #{@text}")
+    it 'drops a message on the default log level (info)' do
+      expect(@worker.logger).not_to receive(:send)
       @worker.say(@text, Delayed::Worker.default_log_level)
     end
   end

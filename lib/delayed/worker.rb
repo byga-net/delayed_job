@@ -280,14 +280,15 @@ module Delayed
     end
 
     def say(text, level = default_log_level)
-      return
-      text = "[Worker(#{name})] #{text}"
-      puts text unless @quiet
-      return unless logger
       # TODO: Deprecate use of Fixnum log levels
       unless level.is_a?(String)
         level = Logger::Severity.constants.detect { |i| Logger::Severity.const_get(i) == level }.to_s.downcase
       end
+      # Per-job RUNNING/COMPLETED lines are too noisy to ship; warnings and errors, such as FAILED, still log.
+      return if %w[debug info].include?(level)
+      text = "[Worker(#{name})] #{text}"
+      puts text unless @quiet
+      return unless logger
       logger.send(level, "#{Time.now.strftime('%FT%T%z')}: #{text}")
     end
 
