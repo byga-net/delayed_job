@@ -279,11 +279,11 @@ module Delayed
       say text, level
     end
 
+    # Logger only, no puts: in a container Rails.logger already writes to stdout, so the
+    # upstream puts printed every line twice. Job RUNNING/COMPLETED/FAILED lines come through here.
     def say(text, level = default_log_level)
-      return
-      text = "[Worker(#{name})] #{text}"
-      puts text unless @quiet
       return unless logger
+      text = "[Worker(#{name})] #{text}"
       # TODO: Deprecate use of Fixnum log levels
       unless level.is_a?(String)
         level = Logger::Severity.constants.detect { |i| Logger::Severity.const_get(i) == level }.to_s.downcase
